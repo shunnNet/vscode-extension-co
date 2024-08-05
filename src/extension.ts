@@ -4,15 +4,23 @@ import * as vscode from 'vscode';
 import { chooseWorkspaceFolder } from "./utils";
 import { resolve } from "path";
 import { Co } from "@imaginary-ai/core";
-
+import { askApiKey, getApiKey, storeApiKey } from './key';
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
-	console.log("Extension 'co' is now active!");
+	const coUpdateApiKeyCommand = vscode.commands.registerCommand("co.updateApiKey", async () => {
+		const apikey = await askApiKey();
+		if (apikey) {
+			await storeApiKey(context, apikey);
+		} else {
+			vscode.window.showErrorMessage('No API key entered, skip updating');
+		}
+	});
 	const coGenerateCommand = vscode.commands.registerCommand('co.generate', async () => {
 		const configs = vscode.workspace.getConfiguration('co');
 		const model = configs.get<string>('model');
-		const apiKey = configs.get<string>('apiKey');
+		const apiKey = await getApiKey(context);
+
 		if (!apiKey) {
 			vscode.window.showErrorMessage('No OpenAI API key found, please set it in the settings');
 			return;
@@ -46,6 +54,7 @@ export function activate(context: vscode.ExtensionContext) {
 		});
 		try {
 			vscode.window.showInformationMessage(`Generating file at ${fullPath}...`);
+			// TODO: show throw meaningful error if failed
 			await co.singleTargetFileGeneration(fullPath);
 			vscode.window.showInformationMessage(`Generation complete! (path: ${fullPath})`);
 		} catch (e) {
@@ -54,6 +63,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	});
 	context.subscriptions.push(coGenerateCommand);
+	context.subscriptions.push(coUpdateApiKeyCommand);
 }
 
 // This method is called when your extension is deactivated

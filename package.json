@@ -15,7 +15,8 @@
     "AI"
   ],
   "activationEvents": [
-    "onCommand:co.generate"
+    "onCommand:co.generate",
+    "onCommand:co.updateApiKey"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -23,12 +24,6 @@
       "title": "co",
       "type": "object",
       "properties": {
-        "co.apiKey": {
-          "type": "string",
-          "default": "",
-          "order": 1,
-          "description": "OpenAI API key"
-        },
         "co.model": {
           "type": "string",
           "default": "gpt-3.5-turbo",
@@ -41,6 +36,11 @@
       {
         "command": "co.generate",
         "title": "generate path (related to workspace root)",
+        "category": "Co"
+      },
+      {
+        "command": "co.updateApiKey",
+        "title": "update api key",
         "category": "Co"
       }
     ]
